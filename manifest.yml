@@ -1,0 +1,52 @@
+modules:
+  confluence:globalPage:
+    - key: addons-secret-hello-world-global-page
+      resource: main
+      render: native
+      resolver:
+        function: resolver
+      title: Addons-Secret
+      route: hello-world
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/index.jsx
+app:
+  runtime:
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/383f07e2-e49c-413b-94c7-65a2d7a51ad0
+permissions:  
+  scopes:
+    - read:confluence-props
+    - write:confluence-props
+    - read:confluence-content.summary
+  external:
+    scripts:
+      - 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
+    images:
+      - '*.images.vexels.com/'
+      - '*.gravatar.com'
+      - '*.wp.com'
+      - '*.atl-paas.net'
+      - '*.atlassian.com'
+      - '*.freepik.com'
+      - '*.gstatic.com'
+    fetch:
+      client:
+        - '*.atlassian.net'
+        - 'https://forge.cdn.prod.atlassian-dev.net'
+        - 'https://fonts.googleapis.com/'
+      backend:
+        - '*.atlassian.net'
+        - 'https://fonts.googleapis.com/'
+
+
+  content:
+    styles:
+      - 'unsafe-inline'
+    scripts:
+      - 'unsafe-hashes'
+      - 'unsafe-eval'
+      - 'unsafe-inline'  
