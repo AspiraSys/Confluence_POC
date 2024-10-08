@@ -21,7 +21,11 @@ permissions:
   scopes:
     - read:confluence-props
     - write:confluence-props
-    - read:confluence-content.summary
+    - read:confluence-content.summary 
+    - read:confluence-space.summary 
+    - read:space:confluence
+    - read:page:confluence
+    - read:confluence-user
   external:
     scripts:
       - 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
@@ -33,6 +37,8 @@ permissions:
       - '*.atlassian.com'
       - '*.freepik.com'
       - '*.gstatic.com'
+      - '*.atlassian.net'
+      - '*.giphy.com'
     fetch:
       client:
         - '*.atlassian.net'
