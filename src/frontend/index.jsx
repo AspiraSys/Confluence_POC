@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import ForgeReconciler, { useProductContext, Stack, Text, Box, Inline, Image, Strong, Heading, Button, ButtonGroup, Icon, Tooltip, Textfield, Badge, Lozenge, DynamicTable, Link, Select, RadioGroup, Radio, Spinner } from '@forge/react';
+import ForgeReconciler, { useProductContext, Stack, Text, Box, Inline, Image, Strong, Heading, Button, ButtonGroup, Icon, Tooltip, Textfield, Badge, Lozenge, DynamicTable, Link, Select, RadioGroup, Radio, Spinner, Label, TimePicker } from '@forge/react';
 import { invoke, requestConfluence } from "@forge/bridge";
 import api, { route, fetch } from "@forge/api";
 import { requireSafeUrl } from '@forge/api/out/safeUrl';
+import ModalPops from '../component/modalPop';
 
 const App = () => {
   const [data, setData] = useState(null);
@@ -22,9 +23,9 @@ const App = () => {
   const [loadingStates, setLoadingStates] = useState({});
   const [spaceCount, setSpaceCount] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalOpens, setModalOpens] = useState(false);
+  const [scheduledConfirm, setScheduledConfirm] = useState(false);
   const context = useProductContext();
-
-  console.log("in aa", spaceCount);
 
   const spaceResponse = async () => {
     setLoading(true)
@@ -49,6 +50,7 @@ const App = () => {
 
       const cleanedBaseUrl = data._links.base.replace('/wiki', '');
       setBaseUrl(cleanedBaseUrl);
+      handleSpaceScanAll()
     } catch (error) {
       console.error('Error fetching spaces:', error);
     } finally {
@@ -303,7 +305,6 @@ const App = () => {
   }
 
   const handleSpaceScanAll = () => {
-    console.log("handle all scannings");
     pageResponse("atlas_doc_format")
     // setAllScanLoading(true);
   }
@@ -348,329 +349,8 @@ const App = () => {
     setFilteredSpaces(filtered);
   }
 
-  // const sensitiveData = (content) => {
-
-  //   // expressions of regex
-
-  //   // // 1. phone number
-  //   // const phoneNumberRegex = /\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g; 
-
-  //   // // 2. IP Addresses (IPv4)
-  //   // const ipv6Regex = /\b([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)\b/g;
-
-  //   // // 3. US Passport Numbers
-  //   // const passportUSRegex = /\b\d{9}\b/g;
-
-  //   // // 4. UK National Insurance Numbers
-  //   // const niNumberRegex = /\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b/g;
-
-  //   // // 5. Canadian Social Insurance Number (SIN)
-  //   // const sinCanadaRegex = /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{3}\b/g;
-
-  //   // // 6. VAT Identification Numbers (EU)
-  //   // const vatRegex = /\b[A-Z]{2}[A-Z0-9]{8,12}\b/g;
-
-  //   // // 7. Bitcoin Addresses
-  //   // const bitcoinAddressRegex = /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/g;
-
-  //   // // 8. JSON Web Tokens (JWT)
-  //   // const jwtRegex = /\b[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\b/g;
-
-  //   // // 9. Driving License Numbers (US)
-  //   // const dlUSRegex = /\b[A-Z0-9]{1,9}\b/g;
-
-  //   // // 10. Vehicle Identification Numbers (VIN)
-  //   // const vinRegex = /\b[A-HJ-NPR-Z0-9]{17}\b/g;
-
-  //   // // 11. Regular expression for National IDs
-  //   // const nationalIDRegex = /(\d{4})\d*(\d{2})|([A-Z]{2}\d+)([A-Z])|([A-Z]{2}\d+)/g;
-
-  //   // // 12. Regular expression to match IBANs
-  //   // const ibanRegex = /\b[A-Z]{2}\d{2}[A-Z\d]{1,30}\b/g;
-
-  //   // // 13. Passport Numbers (General)
-  //   // const passportRegex = /\b([A-Z]{1}[0-9]{7,8}|[A-Z]{2}[0-9]{7,9})\b/g;
-
-  //   console.log('innn', content.slice(1))
-
-  //   const patterns = {
-  //     phoneNumber: /\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g,
-  //     ipv6Address: /\b([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)\b/g,
-  //     usPassport: /\b\d{9}\b/g,
-  //     ukNationalInsurance: /\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b/g,
-  //     canadianSIN: /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{3}\b/g,
-  //     vatNumber: /\b[A-Z]{2}[A-Z0-9]{8,12}\b/g,
-  //     bitcoinAddress: /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/g,
-  //     jwtToken: /\b[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\b/g,
-  //     usDrivingLicense: /\b[A-Z0-9]{1,9}\b/g,
-  //     vin: /\b[A-HJ-NPR-Z0-9]{17}\b/g,
-  //     nationalID: /(\d{4})\d*(\d{2})|([A-Z]{2}\d+)([A-Z])|([A-Z]{2}\d+)/g,
-  //     iban: /\b[A-Z]{2}\d{2}[A-Z\d]{1,30}\b/g,
-  //   };
-
-  //   const results = {};
-
-  // // Parse JSON string if necessary
-  // content.slice(1).forEach((contentString) => {
-  //   try {
-  //     const contentObj = JSON.parse(contentString);
-  //     const extractedText = extractTextFromContent(contentObj.content);
-
-  //     extractedText.forEach((text) => {
-  //       for (let [patternName, regex] of Object.entries(patterns)) {
-  //         const matches = text.match(regex);
-  //         if (matches) {
-  //           if (!results[patternName]) {
-  //             results[patternName] = 0;
-  //           }
-  //           results[patternName] += matches.length;
-  //         }
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error parsing JSON content:', error);
-  //   }
-  // });
-
-  // return results;
-
-  // }
-
-  // const extractTextFromContent = (contentArray) => {
-  //   let textContents = [];
-
-  //   contentArray.forEach((contentItem) => {
-  //     if (contentItem.type === "paragraph" && contentItem.content) {
-  //       contentItem.content.forEach((textItem) => {
-  //         if (textItem.type === "text" && textItem.text) {
-  //           textContents.push(textItem.text);
-  //         }
-  //       });
-  //     }
-  //   });
-
-  //   return textContents;
-  // };
-
-  // 2nd method
-
-  // const sensitiveData = (contents) => {
-  //   const patterns = {
-  //     phoneNumber: {
-  //       regex: /\+?(\d{1,3})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g,
-  //       name: "Phone Number"
-  //     },
-  //     ipv6Address: {
-  //       regex: /\b([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)\b/g,
-  //       name: "IPv6 Address"
-  //     },
-  //     usPassport: {
-  //       regex: /\b\d{9}\b/g,
-  //       name: "US Passport"
-  //     },
-  //     ukNationalInsurance: {
-  //       regex: /\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b/g,
-  //       name: "UK National Insurance"
-  //     },
-  //     canadianSIN: {
-  //       regex: /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{3}\b/g,
-  //       name: "Canadian SIN"
-  //     },
-  //     vatNumber: {
-  //       regex: /\b[A-Z]{2}[A-Z0-9]{8,12}\b/g,
-  //       name: "VAT Number"
-  //     },
-  //     bitcoinAddress: {
-  //       regex: /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/g,
-  //       name: "Bitcoin Address"
-  //     },
-  //     jwtToken: {
-  //       regex: /\b[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\b/g,
-  //       name: "JWT Token"
-  //     },
-  //     usDrivingLicense: {
-  //       regex: /\b[A-Z0-9]{1,9}\b/g,
-  //       name: "US Driving License"
-  //     },
-  //     vin: {
-  //       regex: /\b[A-HJ-NPR-Z0-9]{17}\b/g,
-  //       name: "Vehicle Identification Number (VIN)"
-  //     },
-  //     nationalID: {
-  //       regex: /(\d{4})\d*(\d{2})|([A-Z]{2}\d+)([A-Z])|([A-Z]{2}\d+)/g,
-  //       name: "National ID"
-  //     },
-  //     iban: {
-  //       regex: /\b[A-Z]{2}\d{2}[A-Z\d]{1,30}\b/g,
-  //       name: "IBAN"
-  //     },
-  //     generalPassport: {
-  //       regex: /\b([A-Z]{1}[0-9]{7,8}|[A-Z]{2}[0-9]{7,9})\b/g,
-  //       name: "General Passport"
-  //     }
-  //   };
-
-  //   let totalCount = 0;
-  //   const sensitiveValues = [];
-
-  //   // Parse JSON string if necessary
-  //   contents.slice(1).forEach((contentString) => {
-  //     try {
-  //       const contentObj = JSON.parse(contentString);
-  //       const extractedText = extractTextFromContent(contentObj.content);
-
-  //       extractedText.forEach((text) => {
-  //         for (let [patternName, patternObj] of Object.entries(patterns)) {
-  //           const matches = text.match(patternObj.regex);
-  //           if (matches) {
-  //             matches.forEach(match => {
-  //               sensitiveValues.push({ type: patternObj.name, value: match });
-  //               totalCount++;
-  //             });
-  //           }
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.error('Error parsing JSON content:', error);
-  //     }
-  //   });
-
-  //   return {
-  //     totalCount,
-  //     sensitiveValues
-  //   };
-  // };
-
-  // // Helper function to extract text from the JSON content structure
-  // const extractTextFromContent = (contentArray) => {
-  //   let textContents = [];
-
-  //   contentArray.forEach((contentItem) => {
-  //     if (contentItem.type === "paragraph" && contentItem.content) {
-  //       contentItem.content.forEach((textItem) => {
-  //         if (textItem.type === "text" && textItem.text) {
-  //           textContents.push(textItem.text);
-  //         }
-  //       });
-  //     }
-  //   });
-
-  //   return textContents; // Returns an array of strings with the extracted text
-  // };
-
-  // 3rd method
-
-  // const sensitiveData = (contents) => {
-  //   const patterns = {
-  //     phoneNumber: {
-  //       regex: /\b(?:\+?(\d{1,3}))?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?(\d{1,4})[-.\s]?(\d{1,9})\b/g,
-  //       name: "Phone Number"
-  //     },
-  //     ipv6Address: {
-  //       regex: /\b(?:[0-9a-fA-F]{1,4}:){7}(?:[0-9a-fA-F]{1,4}|:)\b/g,
-  //       name: "IPv6 Address"
-  //     },
-  //     usPassport: {
-  //       regex: /\b\d{9}\b/g,
-  //       name: "US Passport"
-  //     },
-  //     ukNationalInsurance: {
-  //       regex: /\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b/g,
-  //       name: "UK National Insurance"
-  //     },
-  //     canadianSIN: {
-  //       regex: /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{3}\b/g,
-  //       name: "Canadian SIN"
-  //     },
-  //     vatNumber: {
-  //       regex: /\b[A-Z]{2}[A-Z0-9]{8,12}\b/g,
-  //       name: "VAT Number"
-  //     },
-  //     bitcoinAddress: {
-  //       regex: /\b(?:1|3)[a-km-zA-HJ-NP-Z1-9]{25,34}\b/g,
-  //       name: "Bitcoin Address"
-  //     },
-  //     jwtToken: {
-  //       regex: /\b[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\b/g,
-  //       name: "JWT Token"
-  //     },
-  //     usDrivingLicense: {
-  //       regex: /\b[A-Z0-9]{1,9}\b/g,
-  //       name: "US Driving License"
-  //     },
-  //     vin: {
-  //       regex: /\b[A-HJ-NPR-Z0-9]{17}\b/g,
-  //       name: "Vehicle Identification Number (VIN)"
-  //     },
-  //     nationalID: {
-  //       regex: /(?:\b(\d{4})\d*(\d{2})|([A-Z]{2}\d+)([A-Z])|([A-Z]{2}\d+))\b/g,
-  //       name: "National ID"
-  //     },
-  //     iban: {
-  //       regex: /\b[A-Z]{2}\d{2}[A-Z\d]{1,30}\b/g,
-  //       name: "IBAN"
-  //     },
-  //     generalPassport: {
-  //       regex: /\b([A-Z]{1}[0-9]{7,8}|[A-Z]{2}[0-9]{7,9})\b/g,
-  //       name: "General Passport"
-  //     }
-  //   };
-
-  //   let totalCount = 0;
-  //   const sensitiveValues = new Set(); // Using Set to ensure unique values
-
-  //   contents.forEach((contentString, index) => {
-  //     try {
-  //       const contentObj = JSON.parse(contentString);
-  //       const extractedText = extractTextFromContent(contentObj.content);
-
-  //       extractedText.forEach((text) => {
-  //         Object.values(patterns).forEach((patternObj) => {
-  //           const matches = text.match(patternObj.regex);
-  //           if (matches) {
-  //             matches.forEach(match => {
-  //               sensitiveValues.add(JSON.stringify({ type: patternObj.name, value: match })); // Use Set to ensure uniqueness
-  //               totalCount++;
-  //             });
-  //           }
-  //         });
-  //       });
-  //     } catch (error) {
-  //       console.error(`Error parsing JSON content at index ${index}:`, error);
-  //     }
-  //   });
-
-  //   // Convert Set back to Array and parse JSON strings
-  //   const uniqueSensitiveValues = Array.from(sensitiveValues).map(item => JSON.parse(item));
-
-  //   return {
-  //     totalCount,
-  //     sensitiveValues: uniqueSensitiveValues
-  //   };
-  // };
-
-  // // Helper function to extract text from the JSON content structure
-  // const extractTextFromContent = (contentArray) => {
-  //   let textContents = [];
-
-  //   contentArray.forEach((contentItem) => {
-  //     if (contentItem.type === "paragraph" && contentItem.content) {
-  //       contentItem.content.forEach((textItem) => {
-  //         if (textItem.type === "text" && textItem.text) {
-  //           textContents.push(textItem.text);
-  //         }
-  //       });
-  //     }
-  //   });
-
-  //   return textContents; // Returns an array of strings with the extracted text
-  // };
-
-  // 4th method
-
   const sensitiveData = (contents) => {
 
-    // console.log('--', contents)
     const patterns = {
       phoneNumber: {
         regex: /\b\+?(\d{1,4})[-.\s]?(\d{10,12})\b/g,
@@ -844,7 +524,7 @@ const App = () => {
       }
     });
 
-    return textContents; // Returns an array of strings with the extracted text
+    return textContents;
   };
 
   const rows = loading
@@ -905,11 +585,6 @@ const App = () => {
               <Stack alignInline='center'>
                 <Box xcss={{ width: '25px' }}>
                   <Stack alignInline='center'>
-                    {/* <Lozenge appearance="success">0</Lozenge> */}
-                    {/* <Lozenge appearance="success">
-                      <Text>{countValue !== undefined ? countValue : 0}
-                      </Text>
-                    </Lozenge> */}
                     <Box xcss={{ backgroundColor: "color.background.accent.green.subtlest", width: "60px", padding: "space.50" }}>
                       <Stack alignInline="center" alignBlock="center">
                         <Box>
@@ -945,32 +620,13 @@ const App = () => {
                 <Box
                   xcss={{
                     width: "45%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    // display: "flex",
+                    // justifyContent: "center",
+                    // alignItems: "center",
                   }}
                 >
                   <Inline spread="space-between" xcss={{ width: "90%" }}>
-                    {/* <Box>
-                    <Button spacing="compact" onClick={() => toggleDropdownOnPage(rowKey)}>
-                      <Icon glyph="chevron-down" label="chevron-down" size="medium" />
-                    </Button>
-                  </Box> */}
                     <Box>
-                      {/* {
-                        spaceLoading ? 
-                        <Box xcss={{ backgroundColor: 'color.background.accent.gray.subtle.pressed', width: "80px", paddingBlock: "space.100", height: "30px" }}>
-                        <Stack alignBlock="center" alignInline="center" >
-                          <Spinner size="small" />
-                        </Stack>
-                      </Box>
-                        :
-                        <Button appearance="default" iconBefore="vid-play" onClick={() => toggleDropdownOnScan(president.id)}>
-                          Scan All
-                      </Button>
-                      } */}
-
-
                       {loadingStates[president.id] ? (
                         <Box xcss={{ backgroundColor: 'color.background.accent.gray.subtle.pressed', width: "80px", paddingBlock: "space.100", height: "30px" }}>
                           <Stack alignBlock="center" alignInline="center" >
@@ -979,13 +635,9 @@ const App = () => {
                         </Box>
                       ) : (
                         <Button appearance="default" iconBefore="vid-play" onClick={() => toggleDropdownOnScan(president.id)}>
-                          Scan All
+                          Scan
                         </Button>
                       )}
-
-                      {/* <Button appearance="default" iconBefore={spaceLoading ? "" : "vid-play"} onClick={() => toggleDropdownOnScan(president.id)}>
-                          {spaceLoading ? <Spinner size="xsmall" /> : "Scan All"}
-                      </Button> */}
                     </Box>
                     <Box>
                       <Button appearance="default" iconBefore="export" onClick={() => toggleDropdownOnExport(rowKey)}>
@@ -1051,10 +703,63 @@ const App = () => {
         shouldTruncate: true,
         isSortable: false,
         width: "20%"
-
       },
     ],
   };
+
+  const handleSchedule = () => {
+    setModalOpens(true);
+  }
+
+  const completeScan = () => {
+    sessionStorage.removeItem('scheduledScan');
+    setScheduledConfirm(false);
+  };
+
+  const handleScheduleConfirm = (date, time) => {
+    let normalizedTime = time.toUpperCase().replace(/\s+/g, '');
+    const timePattern = /(\d{1,2})([:.]?(\d{2}))?(AM|PM)?/;
+    const match = normalizedTime.match(timePattern);
+
+    if (match) {
+      let [hours, , minutes, period] = match.slice(1);
+      minutes = minutes || '00';
+      period = period || 'AM';
+      normalizedTime = `${hours}:${minutes} ${period}`;
+    } else {
+      console.error("Invalid time format");
+    }
+
+    const scheduledDateTime = {
+      date: date,
+      time: normalizedTime,
+    };
+    sessionStorage.setItem('scheduledScan', JSON.stringify(scheduledDateTime));
+    setScheduledConfirm(true);
+  };
+
+  const checkScheduledScan = () => {
+    const scheduledScan = sessionStorage.getItem('scheduledScan');
+    if (scheduledScan) {
+      const { date, time } = JSON.parse(scheduledScan);
+
+      const scheduledDateTime = new Date(`${date} ${time}`);
+
+      const now = new Date();
+
+      if (!isNaN(scheduledDateTime.getTime()) && now >= scheduledDateTime) {
+        handleSpaceScanAll();
+        completeScan();
+      } else if (isNaN(scheduledDateTime.getTime())) {
+        console.error("Invalid scheduled date and time:", scheduledDateTime);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(checkScheduledScan, 10000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <>
@@ -1092,6 +797,9 @@ const App = () => {
             <Stack grow="fill" alignInline='end'>
               <Box xcss={{ width: '80%' }}>
                 <Inline alignInline='end' space='space.200'>
+                  <Tooltip content="Schedule scans for all spaces in this instance" position="top">
+                    <Button appearance={scheduledConfirm ? "subtle" : "primary"} iconBefore="schedule" isLoading={allScanLoading} isDisabled={scheduledConfirm} onClick={handleSchedule}>{scheduledConfirm ? 'Scheduled' : 'Schedule'}</Button>
+                  </Tooltip>
                   {allScanLoading ?
                     <Box xcss={{
                       backgroundColor: 'color.background.accent.blue.bolder', borderRadius: 'border.radius',
@@ -1103,7 +811,7 @@ const App = () => {
                         <Spinner size="small" appearance="invert" />
                       </Stack>
                     </Box> :
-                    <Tooltip content="Schedule scans for all spaces in this instance" position="bottom">
+                    <Tooltip content="Scans for all spaces in this instance" position="bottom">
                       <Button appearance="primary" iconBefore="vid-play" isLoading={allScanLoading} onClick={handleSpaceScanAll} >Scan All</Button>
                     </Tooltip>
                   }
@@ -1113,7 +821,7 @@ const App = () => {
                   <Tooltip content="Adjust Sotteri Security Settings" position="top">
                     <Box xcss={{ height: '80px' }}>
                       <Button>
-                        <Box xcss={{ padding: "space.050" }}>
+                        <Box xcss={{ padding: "space.0" }}>
                           <Icon glyph="settings" label="settings" size="medium" />
                         </Box>
                       </Button>
@@ -1122,7 +830,7 @@ const App = () => {
                   <Tooltip content="Documentation" position="top">
                     <Box xcss={{ height: '80px' }}>
                       <Button appearance='subtle'>
-                        <Box xcss={{ padding: "space.050" }}>
+                        <Box xcss={{ padding: "space.0" }}>
                           <Icon glyph="info" label="info" size="medium" />
                         </Box>
                       </Button>
@@ -1161,41 +869,8 @@ const App = () => {
                 <Button appearance='subtle' spacing='compact' onClick={toggleDropdown}>
                   <Box>
                     <Icon glyph="chevron-down" label="chevron-down" size="medium" />
-
                   </Box>
-
-                  {/* <Select
-                    appearance="subtle"
-                    placeholder=
-                    // {
-                    //   <Box>
-                    //     <Lozenge appearance="inprogress">{isCheckedString.toLocaleUpperCase()}</Lozenge>
-                    //   </Box>
-                    // }
-                    'select the order'
-                    // options={[
-                    //   { label: 'Show All Spaces', value: 'All' },
-                    //   { label: 'Show Normal Spaces', value: 'Normal' },
-                    //   { label: 'Show Personal Spaces', value: 'Personal' },
-                    // ]}
-                  /> */}
                 </Button>
-
-                {/* {isDropdownVisible && (
-                  <Box>
-                    <Select
-                      appearance="subtle"
-                      options={[
-                        { label: 'In progress', value: 'InProgress' },
-                        { label: 'Show All Spaces', value: 'All' },
-                        { label: 'Show Normal Spaces', value: 'Normal' },
-                        { label: 'Show Personal Spaces', value: 'Personal' },
-                      ]}
-                      onChange={handleSelection}
-                    />
-                  </Box>
-                )} */}
-
               </Inline>
             </Box>
           </Inline>
@@ -1211,6 +886,11 @@ const App = () => {
               />
             </Box>
           </Inline>
+
+          {
+            modalOpens &&
+            <ModalPops isOpens={modalOpens} setIsOpen={setModalOpens} handleScheduled={handleScheduleConfirm} />
+          }
 
         </Box>
       </Stack>
