@@ -4,6 +4,8 @@ import { invoke, requestConfluence } from "@forge/bridge";
 import api, { route, fetch } from "@forge/api";
 import { requireSafeUrl } from '@forge/api/out/safeUrl';
 import ModalPops from '../component/modalPop';
+import DetailSpace from '../component/DetailSpace';
+import { router } from "@forge/bridge";
 
 const App = () => {
   const [data, setData] = useState(null);
@@ -25,6 +27,7 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalOpens, setModalOpens] = useState(false);
   const [scheduledConfirm, setScheduledConfirm] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const context = useProductContext();
 
   const spaceResponse = async () => {
@@ -435,7 +438,12 @@ const App = () => {
       passportNumber: {
         regex: /\b([A-Z]{1}\d{7}|[A-Z]{2}\d{7,9})\b/g,
         name: "Passport Number"
+      },
+      amburNumber: {
+        regex: /([A-Za-z]+) \([A-Z]{2}\): (\b[A-Z]\d{3} \b[A-Z]\d{3} \b[A-Z]\d{3}\b)/g,
+        name: "Ambur Number"
       }
+
     };
 
     let totalCount = 0;
@@ -527,6 +535,13 @@ const App = () => {
     return textContents;
   };
 
+  const handleNavigate = () => {
+    console.log("clicked");
+    // router.open("https://mycipl.in/index.php");
+    setDetailModalOpen(true);
+  }
+
+  console.log('in looggs', baseUrl)
   const rows = loading
     ? [
       {
@@ -558,23 +573,36 @@ const App = () => {
           {
             key: createKey(president.name),
             content: (
-              <Inline alignBlock='center'>
-                <Box xcss={{
-                  width: '35px',
-                  height: '35px',
-                  borderRadius: 'border.radius',
-                }}>
+              <Inline alignBlock="center">
+                <Box
+                  xcss={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "border.radius",
+                  }}>
                   <Image
                     src={`${baseUrl}${president.icon.path}`}
                     alt={`Avatar of ${president.authorId}`}
-                    style={{ width: '100%', height: '100%' }}
+                    style={{ width: "100%", height: "100%" }}
                   />
                 </Box>
 
-                <Box xcss={{ paddingInline: 'space.200', color: 'color.text.selected' }}>
-                  <Text>
-                    <Link href="" openNewTab="true">{president.name}</Link>
-                  </Text>
+                <Box
+                  xcss={{
+                    paddingInline: "space.200",
+                    color: "color.text.selected",
+                  }}>
+                  <Button appearance="subtle" onClick={() => handleNavigate()}>
+                    <Text>
+                      {/* <Button> */}
+                      {/* <Link href={`${baseUrl}/${president.name}`} openNewTab="true">{president.name}</Link> */}
+                      {president.name}
+                      {/* <Link href="https://atlassian.com">
+                      {president.name}
+                    </Link> */}
+                      {/* </Button> */}
+                    </Text>
+                  </Button>
                 </Box>
               </Inline>
             ),
@@ -582,17 +610,23 @@ const App = () => {
           {
             key: createKey(president.findings),
             content: (
-              <Stack alignInline='center'>
-                <Box xcss={{ width: '25px' }}>
-                  <Stack alignInline='center'>
-                    <Box xcss={{ backgroundColor: "color.background.accent.green.subtlest", width: "60px", padding: "space.50" }}>
+              <Stack alignInline="center">
+                <Box xcss={{ width: "25px" }}>
+                  <Stack alignInline="center">
+                    <Box
+                      xcss={{
+                        backgroundColor:
+                          "color.background.accent.green.subtlest",
+                        width: "60px",
+                        padding: "space.50",
+                      }}>
                       <Stack alignInline="center" alignBlock="center">
                         <Box>
-                          {countValue > 0 ?
+                          {countValue > 0 ? (
                             <Text>{countValue}</Text>
-                            :
+                          ) : (
                             <Text> 0</Text>
-                          }
+                          )}
                         </Box>
                       </Stack>
                     </Box>
@@ -604,9 +638,13 @@ const App = () => {
           {
             key: createKey(president.scanStatus),
             content: (
-              <Stack alignInline='center'>
-                <Box xcss={{ backgroundColor: "color.background.accent.green.subtlest", width: "100px" }}>
-                  <Stack alignInline='center'>
+              <Stack alignInline="center">
+                <Box
+                  xcss={{
+                    backgroundColor: "color.background.accent.green.subtlest",
+                    width: "100px",
+                  }}>
+                  <Stack alignInline="center">
                     <Lozenge appearance="success">Up To Date</Lozenge>
                   </Stack>
                 </Box>
@@ -616,41 +654,55 @@ const App = () => {
           {
             key: createKey(president.actions),
             content: (
-              <Stack alignBlock="center" alignInline="center" xcss={{ width: "100%" }}>
+              <Stack
+                alignBlock="center"
+                alignInline="center"
+                xcss={{ width: "100%" }}>
                 <Box
                   xcss={{
                     width: "45%",
                     // display: "flex",
                     // justifyContent: "center",
                     // alignItems: "center",
-                  }}
-                >
+                  }}>
                   <Inline spread="space-between" xcss={{ width: "90%" }}>
                     <Box>
                       {loadingStates[president.id] ? (
-                        <Box xcss={{ backgroundColor: 'color.background.accent.gray.subtle.pressed', width: "80px", paddingBlock: "space.100", height: "30px" }}>
-                          <Stack alignBlock="center" alignInline="center" >
+                        <Box
+                          xcss={{
+                            backgroundColor:
+                              "color.background.accent.gray.subtle.pressed",
+                            width: "80px",
+                            paddingBlock: "space.100",
+                            height: "30px",
+                          }}>
+                          <Stack alignBlock="center" alignInline="center">
                             <Spinner size="small" />
                           </Stack>
                         </Box>
                       ) : (
-                        <Button appearance="default" iconBefore="vid-play" onClick={() => toggleDropdownOnScan(president.id)}>
+                        <Button
+                          appearance="default"
+                          iconBefore="vid-play"
+                          onClick={() => toggleDropdownOnScan(president.id)}>
                           Scan
                         </Button>
                       )}
                     </Box>
                     <Box>
-                      <Button appearance="default" iconBefore="export" onClick={() => toggleDropdownOnExport(rowKey)}>
+                      <Button
+                        appearance="default"
+                        iconBefore="export"
+                        onClick={() => toggleDropdownOnExport(rowKey)}>
                         Export
                       </Button>
                     </Box>
                   </Inline>
                 </Box>
               </Stack>
-            )
+            ),
           },
         ],
-
       };
     });
 
@@ -765,71 +817,107 @@ const App = () => {
     <>
       {/* parent container */}
 
-      <Stack alignBlock='center' alignInline='center'>
+      <Stack alignBlock="center" alignInline="center">
         <Box xcss={{ width: "75%", padding: "space.300" }}>
-
           {/* 1st part */}
 
-          <Inline space="space.200" alignBlock='center'>
+          <Inline space="space.200" alignBlock="center">
             <Stack>
-              <Box xcss={{
-                backgroundColor: 'color.background.discovery',
-                borderRadius: 'border.radius',
-                borderStyle: 'solid',
-                borderWidth: 'border.width',
-                borderColor: 'color.border',
-                padding: 'space.200',
-                height: '60px',
-                width: '60px'
-              }} />
+              <Box
+                xcss={{
+                  backgroundColor: "color.background.discovery",
+                  borderRadius: "border.radius",
+                  borderStyle: "solid",
+                  borderWidth: "border.width",
+                  borderColor: "color.border",
+                  padding: "space.200",
+                  height: "60px",
+                  width: "60px",
+                }}
+              />
             </Stack>
             <Stack>
-              <Heading as="h2" level="h600">Sotteri Dashboard</Heading>
+              <Heading as="h2" level="h600">
+                Sotteri Dashboard
+              </Heading>
             </Stack>
           </Inline>
 
           {/* 2nd part */}
 
-          <Inline space="space.200" alignBlock='center'>
+          <Inline space="space.200" alignBlock="center">
             <Stack grow="hug">
-              <Heading as="h3" level="h600">Spaces</Heading>
+              <Heading as="h3" level="h600">
+                Spaces
+              </Heading>
             </Stack>
-            <Stack grow="fill" alignInline='end'>
-              <Box xcss={{ width: '80%' }}>
-                <Inline alignInline='end' space='space.200'>
-                  <Tooltip content="Schedule scans for all spaces in this instance" position="top">
-                    <Button appearance={scheduledConfirm ? "subtle" : "primary"} iconBefore="schedule" isLoading={allScanLoading} isDisabled={scheduledConfirm} onClick={handleSchedule}>{scheduledConfirm ? 'Scheduled' : 'Schedule'}</Button>
+            <Stack grow="fill" alignInline="end">
+              <Box xcss={{ width: "80%" }}>
+                <Inline alignInline="end" space="space.200">
+                  <Tooltip
+                    content="Schedule scans for all spaces in this instance"
+                    position="top">
+                    <Button
+                      appearance={scheduledConfirm ? "subtle" : "primary"}
+                      iconBefore="schedule"
+                      isLoading={allScanLoading}
+                      isDisabled={scheduledConfirm}
+                      onClick={handleSchedule}>
+                      {scheduledConfirm ? "Scheduled" : "Schedule"}
+                    </Button>
                   </Tooltip>
-                  {allScanLoading ?
-                    <Box xcss={{
-                      backgroundColor: 'color.background.accent.blue.bolder', borderRadius: 'border.radius',
-                      borderStyle: 'solid',
-                      borderWidth: 'border.width',
-                      borderColor: 'color.border', width: "90px", paddingBlock: "space.100", height: "32px"
-                    }}>
-                      <Stack alignBlock="center" alignInline="center" >
+                  {allScanLoading ? (
+                    <Box
+                      xcss={{
+                        backgroundColor: "color.background.accent.blue.bolder",
+                        borderRadius: "border.radius",
+                        borderStyle: "solid",
+                        borderWidth: "border.width",
+                        borderColor: "color.border",
+                        width: "90px",
+                        paddingBlock: "space.100",
+                        height: "32px",
+                      }}>
+                      <Stack alignBlock="center" alignInline="center">
                         <Spinner size="small" appearance="invert" />
                       </Stack>
-                    </Box> :
-                    <Tooltip content="Scans for all spaces in this instance" position="bottom">
-                      <Button appearance="primary" iconBefore="vid-play" isLoading={allScanLoading} onClick={handleSpaceScanAll} >Scan All</Button>
+                    </Box>
+                  ) : (
+                    <Tooltip
+                      content="Scans for all spaces in this instance"
+                      position="bottom">
+                      <Button
+                        appearance="primary"
+                        iconBefore="vid-play"
+                        isLoading={allScanLoading}
+                        onClick={handleSpaceScanAll}>
+                        Scan All
+                      </Button>
                     </Tooltip>
-                  }
-                  <Tooltip content="Download findings for all spaces to a CSV file" position="top">
+                  )}
+                  <Tooltip
+                    content="Download findings for all spaces to a CSV file"
+                    position="top">
                     <Button>Export All Findings</Button>
                   </Tooltip>
-                  <Tooltip content="Adjust Sotteri Security Settings" position="top">
-                    <Box xcss={{ height: '80px' }}>
+                  <Tooltip
+                    content="Adjust Sotteri Security Settings"
+                    position="top">
+                    <Box xcss={{ height: "80px" }}>
                       <Button>
                         <Box xcss={{ padding: "space.0" }}>
-                          <Icon glyph="settings" label="settings" size="medium" />
+                          <Icon
+                            glyph="settings"
+                            label="settings"
+                            size="medium"
+                          />
                         </Box>
                       </Button>
                     </Box>
                   </Tooltip>
                   <Tooltip content="Documentation" position="top">
-                    <Box xcss={{ height: '80px' }}>
-                      <Button appearance='subtle'>
+                    <Box xcss={{ height: "80px" }}>
+                      <Button appearance="subtle">
                         <Box xcss={{ padding: "space.0" }}>
                           <Icon glyph="info" label="info" size="medium" />
                         </Box>
@@ -843,32 +931,46 @@ const App = () => {
 
           {/* 3rd part */}
 
-          <Inline space="space.200" alignBlock='center'>
-            <Box xcss={{ width: "22%", backgroundColor: "color.background.accent.gray.subtlest.pressed" }}>
+          <Inline space="space.200" alignBlock="center">
+            <Box
+              xcss={{
+                width: "22%",
+                backgroundColor:
+                  "color.background.accent.gray.subtlest.pressed",
+              }}>
               <Textfield
                 appearance="standard"
                 placeholder="filter by space name"
                 onChange={(e) => handleFilter(e)}
               />
             </Box>
-            <Box xcss={{
-              width: "20%",
-              backgroundColor: 'color.background.input.hovered',
-              padding: 'space.100',
-              borderRadius: 'border.radius',
-              borderStyle: 'none',
-              borderWidth: 'border.width',
-              borderColor: 'color.border',
-
-            }}>
+            <Box
+              xcss={{
+                width: "20%",
+                backgroundColor: "color.background.input.hovered",
+                padding: "space.100",
+                borderRadius: "border.radius",
+                borderStyle: "none",
+                borderWidth: "border.width",
+                borderColor: "color.border",
+              }}>
               <Inline alignBlock="center" space="space.100">
                 <Text>Spaces type:</Text>
                 <Box>
-                  <Lozenge appearance="inprogress">{isCheckedString.toLocaleUpperCase()}</Lozenge>
+                  <Lozenge appearance="inprogress">
+                    {isCheckedString.toLocaleUpperCase()}
+                  </Lozenge>
                 </Box>
-                <Button appearance='subtle' spacing='compact' onClick={toggleDropdown}>
+                <Button
+                  appearance="subtle"
+                  spacing="compact"
+                  onClick={toggleDropdown}>
                   <Box>
-                    <Icon glyph="chevron-down" label="chevron-down" size="medium" />
+                    <Icon
+                      glyph="chevron-down"
+                      label="chevron-down"
+                      size="medium"
+                    />
                   </Box>
                 </Button>
               </Inline>
@@ -879,19 +981,21 @@ const App = () => {
 
           <Inline>
             <Box xcss={{ width: "100%", paddingBlockStart: "space.300" }}>
-              <DynamicTable
-                caption=""
-                head={head}
-                rows={rows}
-              />
+              <DynamicTable caption="" head={head} rows={rows} />
             </Box>
           </Inline>
 
-          {
-            modalOpens &&
-            <ModalPops isOpens={modalOpens} setIsOpen={setModalOpens} handleScheduled={handleScheduleConfirm} />
-          }
+          {modalOpens && (
+            <ModalPops
+              isOpens={modalOpens}
+              setIsOpen={setModalOpens}
+              handleScheduled={handleScheduleConfirm}
+            />
+          )}
 
+          {detailModalOpen && (
+            <DetailSpace isOpens={detailModalOpen} setIsOpen={setDetailModalOpen} />
+          )}
         </Box>
       </Stack>
     </>
